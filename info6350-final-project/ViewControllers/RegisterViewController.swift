@@ -6,10 +6,14 @@
 //
 
 import UIKit
+import CoreData
 import FirebaseAuth
-import FirebaseFirestore
 
 class RegisterViewController: UIViewController, UITextFieldDelegate {
+    
+    var ds = DataStore.shared
+    
+    var managedContext: NSManagedObjectContext = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext!
 
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var firstNameInput: UITextField!
@@ -42,6 +46,14 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         errorLabel.alpha = 1
     }
     
+    func resetFields() {
+        firstNameInput.text = ""
+        lastNameInput.text = ""
+        emailInput.text = ""
+        passwordInput.text = ""
+        confirmPasswordInput.text = ""
+    }
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         let nextTag = textField.tag + 1
 
@@ -55,20 +67,22 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     }
     
     func validateFields() -> String? {
-        if Utilities.sanitizeInputField(firstNameInput) == "" || Utilities.sanitizeInputField(lastNameInput) == "" ||
-            Utilities.sanitizeInputField(emailInput) == "" ||
-            Utilities.sanitizeInputField(passwordInput) == "" ||
-            Utilities.sanitizeInputField(confirmPasswordInput) == "" {
+        if Utilities.sanitizeTextInput(firstNameInput.text!) == "" || Utilities.sanitizeTextInput(lastNameInput.text!) == "" ||
+            Utilities.sanitizeTextInput(emailInput.text!) == "" ||
+            Utilities.sanitizeTextInput(passwordInput.text!) == "" ||
+            Utilities.sanitizeTextInput(confirmPasswordInput.text!) == "" {
             return "Please fill in all fields."
         }
         
-        if Utilities.isEmailvalid(Utilities.sanitizeInputField(emailInput)) == false {
+        let emailInput = Utilities.sanitizeTextInput(emailInput.text!)
+        
+        if Utilities.isEmailvalid(emailInput) == false {
             return "Invalid email address."
         }
         
-        let cleanedPassword = Utilities.sanitizeInputField(passwordInput)
+        let cleanedPassword = Utilities.sanitizeTextInput(passwordInput.text!)
         
-        let cleanedConfirmPassword = Utilities.sanitizeInputField(confirmPasswordInput)
+        let cleanedConfirmPassword = Utilities.sanitizeTextInput(confirmPasswordInput.text!)
         
         if cleanedPassword != cleanedConfirmPassword {
             return "Password & Confirm Password don't match."
@@ -87,38 +101,36 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         if error != nil {
             showError(error!)
         } else {
-            let firstName = Utilities.sanitizeInputField(firstNameInput)
-            let lastName = Utilities.sanitizeInputField(lastNameInput)
-            let email = Utilities.sanitizeInputField(emailInput)
-            let password = Utilities.sanitizeInputField(passwordInput)
+            let firstName = Utilities.sanitizeTextInput(firstNameInput.text!)
+            let lastName = Utilities.sanitizeTextInput(lastNameInput.text!)
+            let email = Utilities.sanitizeTextInput(emailInput.text!)
+            let password = Utilities.sanitizeTextInput(passwordInput.text!)
             
             Auth.auth().createUser(withEmail: email, password: password, completion: { (result,err) in
                 if err != nil {
-                    self.showError("Error creating user")
-                } else {
-                    let db = Firestore.firestore()
                     
-                    db.collection("users").addDocument(data: ["firstname":firstName, "lastname":lastName, "uid": result!.user.uid ]) { (error) in
-                        
-                        if error != nil {
-                            self.showError("Error saving user data")
-                        }
+                    switch AuthErrorCode(rawValue: err!._code) {
+                        case .emailAlreadyInUse : self.showError("Email already registered")
+                        default: self.showError("Error creating user")
                     }
+                } else {
+                    let user = User(context: self.managedContext)
+                    user.id = result!.user.uid
+                    user.firstName = firstName
+                    user.lastName = lastName
+                    self.ds.addUser(user)
                     
-                    self.gotoUserDashboard()
+                    self.ds.authUser = user
+                    
+                    self.resetFields()
+                    self.performSegue(withIdentifier: "afterRegisterSuccess", sender: nil)
                 }
             })
         }
     }
     
     @IBAction func doCancel(_ sender: UIButton) {
-        _ = navigationController?.popViewController(animated: true)
-    }
-    
-    func gotoUserDashboard() {
-        let userDashboardViewController = storyboard?.instantiateViewController(identifier: Constants.Storyboard.userDashboardViewController) as? UserDashboardViewController
-        
-        self.navigationController?.pushViewController(userDashboardViewController!, animated: true)
+        navigationController?.popViewController(animated: true)
     }
     
     /*

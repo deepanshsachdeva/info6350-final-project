@@ -8,7 +8,5 @@ target 'info6350-final-project' do
   # Pods for info6350-final-project
   pod 'Firebase/Analytics'
   pod 'Firebase/Auth'
-  pod 'Firebase/Core'
-  pod 'Firebase/Firestore'
 
 end

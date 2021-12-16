@@ -9,11 +9,14 @@ import UIKit
 import FirebaseAuth
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
+    
+    let ds = DataStore.shared
 
     @IBOutlet weak var errorLabel: UILabel!
     
     @IBOutlet weak var emailInput: UITextField!
     @IBOutlet weak var passwordInput: UITextField!
+    @IBOutlet weak var loginButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,13 +45,20 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         errorLabel.alpha = 1
     }
     
+    func resetFields() {
+        emailInput.text = ""
+        passwordInput.text = ""
+    }
+    
     func validateFields() -> String? {
-        if Utilities.sanitizeInputField(emailInput) == "" ||
-            Utilities.sanitizeInputField(passwordInput) == "" {
+        if Utilities.sanitizeTextInput(emailInput.text!) == "" ||
+            Utilities.sanitizeTextInput(passwordInput.text!) == "" {
             return "Please fill in all fields."
         }
         
-        if Utilities.isEmailvalid(Utilities.sanitizeInputField(emailInput)) == false {
+        let emailInput = Utilities.sanitizeTextInput(emailInput.text!)
+        
+        if Utilities.isEmailvalid(emailInput) == false {
             return "Invalid email address."
         }
         
@@ -70,30 +80,45 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     @IBAction func doLogin(_ sender: Any) {
         clearError()
         
+        loginButton.isEnabled = false
+        
         let error = validateFields()
         
         if error != nil {
             showError(error!)
         } else {
-            let email = Utilities.sanitizeInputField(emailInput)
-            let password = Utilities.sanitizeInputField(passwordInput)
+            let email = Utilities.sanitizeTextInput(emailInput.text!)
+            let password = Utilities.sanitizeTextInput(passwordInput.text!)
             
             Auth.auth().signIn(withEmail: email, password: password) { (result, error) in
                 
                 if error != nil {
-                    self.showError(error!.localizedDescription)
+                    print(error!._code)
+                    switch AuthErrorCode(rawValue: error!._code) {
+                        case .networkError:
+                            self.showError("Internet connection not available")
+                    case .invalidCredential, .invalidEmail, .wrongPassword:
+                            self.showError("Invalid Credentials")
+                        default:
+                            self.showError(error!.localizedDescription)
+                    }
                 }
                 else {
-                    self.gotoUserDashboard()
+                    let authUser = result?.user
+                    
+                    self.ds.authUser = self.ds.getUserByUID(authUser?.uid as! String)
+                    
+                    self.resetFields()
+                    self.performSegue(withIdentifier: "afterLoginSuccess", sender: nil)
                 }
             }
         }
     }
     
     func gotoUserDashboard() {
-        let userDashboardViewController = storyboard?.instantiateViewController(identifier: Constants.Storyboard.userDashboardViewController) as? UserDashboardViewController
+        let userPostViewController = storyboard?.instantiateViewController(identifier: Constants.Storyboard.userPostsViewController) as? UserPostsTableViewController
         
-        self.navigationController?.pushViewController(userDashboardViewController!, animated: true)
+        navigationController?.pushViewController(userPostViewController!, animated: true)
     }
     
     /*
