@@ -28,9 +28,12 @@ class PostCRUViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        descriptionInput.addDoneButton(title: "Done", target: self, selector: #selector(tapDone(sender:)))
         
         descriptionInput.layer.borderWidth = 0.5
         descriptionInput.layer.borderColor = UIColor.lightGray.cgColor
+        
+        titleInput.delegate = self
         
         if post != nil {
             actionButton.setTitle("Save", for: .normal)
@@ -48,6 +51,10 @@ class PostCRUViewController: UIViewController, UITextFieldDelegate {
         }
         
         clearError()
+    }
+    
+    @objc func tapDone(sender: Any) {
+        self.view.endEditing(true)
     }
     
     func clearError() {
@@ -119,7 +126,7 @@ class PostCRUViewController: UIViewController, UITextFieldDelegate {
                         return try? queryDocumentSnapshot.data(as: User.self)
                     }[0]
                     
-                    let newPost = Post(title: title, body: body, createdByUID: (self.user?.uid)!, createdByFullName: "\(dbUser.firstName) \(dbUser.lastName)")
+                    let newPost = Post(title: title, body: body, createdByUID: (self.user?.uid)!, createdByFullName: "\(dbUser.firstName) \(dbUser.lastName)", lastUpdated: Date.now)
                     
                     do {
                         let _ = try self.db.collection("posts").addDocument(from: newPost)

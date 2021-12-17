@@ -9,12 +9,14 @@ import UIKit
 import FirebaseAuth
 import FirebaseFirestore
 
-class PostsTableViewController: UITableViewController {
+class PostsTableViewController: UITableViewController, UISearchBarDelegate {
     var posts:[Post] = []
+    var filteredPosts:[Post] = []
     
     let db = Firestore.firestore()
     
     var isRefreshing:Bool = false
+    var isSearchActive:Bool = false
 
     @IBOutlet weak var searchBar: UISearchBar!
     
@@ -26,10 +28,14 @@ class PostsTableViewController: UITableViewController {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
         
+        searchBar.delegate = self
+        
         tableView.refreshControl = UIRefreshControl()
         tableView.refreshControl?.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         
         isRefreshing = true
+        
+        searchBar.setShowsCancelButton(false, animated: true)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -38,6 +44,38 @@ class PostsTableViewController: UITableViewController {
         isRefreshing = true
         
         fetchData()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        isSearchActive = true
+        
+        let keyword = Utilities.sanitizeTextInput(searchText.lowercased())
+        
+        guard keyword.isEmpty == false else{
+            filteredPosts = posts
+            tableView.reloadData()
+            searchBar.setShowsCancelButton(false, animated: true)
+            return
+        }
+        
+        searchBar.setShowsCancelButton(true, animated: true)
+        
+        filteredPosts = posts.filter({ $0.title.lowercased().contains(keyword) })
+        
+        tableView.reloadData()
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        isSearchActive = true
+        searchBar.resignFirstResponder()
+        tableView.reloadData()
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        isSearchActive = false
+        fetchData()
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
     }
     
     @objc func refreshData() {
@@ -82,11 +120,13 @@ class PostsTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let count = posts.count
+        let count = isSearchActive ? filteredPosts.count : posts.count
         
         if count == 0 {
             if isRefreshing {
                 tableView.setEmptyView(title: "Fetching posts...", message: "")
+            } else if isSearchActive {
+                tableView.setEmptyView(title: "No results found for the search keyword.", message: "Search results will be here.")
             } else {
                 tableView.setEmptyView(title: "No posts available yet.", message: "Posts will be in here.")
             }
@@ -101,13 +141,13 @@ class PostsTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
         
-        let post = posts[indexPath.row]
+        let post = isSearchActive ? filteredPosts[indexPath.row] : posts[indexPath.row]
         
         cell.textLabel?.font = UIFont.boldSystemFont(ofSize: 18.0)
         cell.textLabel?.text = "\(post.title) by \(post.createdByFullName)"
         
         cell.detailTextLabel?.font = UIFont.italicSystemFont(ofSize: 13.0)
-        cell.detailTextLabel?.text = "last updated on \(Utilities.getFormattedDateString(post.lastUpdated!))"
+        cell.detailTextLabel?.text = "last updated on \(post.lastUpdated != nil ? Utilities.getFormattedDateString(post.lastUpdated!) : "n/a")"
 
         return cell
     }

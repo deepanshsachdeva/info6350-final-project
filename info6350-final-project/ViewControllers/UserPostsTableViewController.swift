@@ -39,7 +39,7 @@ class UserPostsTableViewController: UITableViewController {
     func fetchData() {
         let user = Auth.auth().currentUser
         
-        db.collection("posts").whereField("createdByUID", isEqualTo: user?.uid).getDocuments() { (querySnapshot, err) in
+        db.collection("posts").whereField("createdByUID", isEqualTo: user?.uid).order(by: "lastUpdated", descending: true).getDocuments() { (querySnapshot, err) in
             if let error = err {
                 print(error)
                 return
