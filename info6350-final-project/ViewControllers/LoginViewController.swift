@@ -9,8 +9,6 @@ import UIKit
 import FirebaseAuth
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
-    
-    let ds = DataStore.shared
 
     @IBOutlet weak var errorLabel: UILabel!
     
@@ -26,6 +24,13 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         passwordInput.delegate = self
         
         setupElements()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        clearError()
+        resetFields()
     }
     
     func setupElements() {
@@ -93,26 +98,24 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             Auth.auth().signIn(withEmail: email, password: password) { (result, error) in
                 
                 if error != nil {
-                    print(error!._code)
                     switch AuthErrorCode(rawValue: error!._code) {
-                        case .networkError:
-                            self.showError("Internet connection not available")
+                    case .userNotFound:
+                        self.showError("User not registered.")
+                    case .networkError:
+                        self.showError("Internet connection not available.")
                     case .invalidCredential, .invalidEmail, .wrongPassword:
-                            self.showError("Invalid Credentials")
-                        default:
-                            self.showError(error!.localizedDescription)
+                        self.showError("Invalid Credentials.")
+                    default:
+                        self.showError(error!.localizedDescription)
                     }
-                }
-                else {
-                    let authUser = result?.user
-                    
-                    self.ds.authUser = self.ds.getUserByUID(authUser?.uid as! String)
-                    
+                } else {
                     self.resetFields()
                     self.performSegue(withIdentifier: "afterLoginSuccess", sender: nil)
                 }
             }
         }
+        
+        self.loginButton.isEnabled = true
     }
     
     func gotoUserDashboard() {

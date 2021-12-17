@@ -6,31 +6,72 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 class PostsTableViewController: UITableViewController {
     var posts:[Post] = []
     
-    let ds = DataStore.shared
+    let db = Firestore.firestore()
+    
+    var isRefreshing:Bool = false
 
     @IBOutlet weak var searchBar: UISearchBar!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        
+        tableView.refreshControl = UIRefreshControl()
+        tableView.refreshControl?.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        
+        isRefreshing = true
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        refreshData()
+        super.viewDidAppear(animated)
+        
+        isRefreshing = true
+        
+        fetchData()
     }
     
-    func refreshData() {
-        posts = ds.getPosts()
+    @objc func refreshData() {
+        isRefreshing = true
+        
+        self.posts = []
+        
         tableView.reloadData()
+        
+        fetchData()
+    }
+    
+    func fetchData() {
+        tableView.refreshControl?.beginRefreshing()
+        
+        db.collection("posts").order(by: "lastUpdated", descending: true).getDocuments() { (querySnapshot, err) in
+            if let error = err {
+                print(error)
+                return
+            }
+            
+            guard let documents = querySnapshot?.documents else {
+                print("No posts")
+                return
+            }
+            
+            self.posts = documents.compactMap { queryDocumentSnapshot -> Post? in
+                return try? queryDocumentSnapshot.data(as: Post.self)
+            }
+            
+            self.tableView.refreshControl?.endRefreshing()
+            self.isRefreshing = false
+            self.tableView.reloadData()
+        }
     }
 
     // MARK: - Table view data source
@@ -44,7 +85,11 @@ class PostsTableViewController: UITableViewController {
         let count = posts.count
         
         if count == 0 {
-            tableView.setEmptyView(title: "No posts available yet.", message: "Posts will be in here.")
+            if isRefreshing {
+                tableView.setEmptyView(title: "Fetching posts...", message: "")
+            } else {
+                tableView.setEmptyView(title: "No posts available yet.", message: "Posts will be in here.")
+            }
         } else {
             tableView.restore()
         }
@@ -58,8 +103,11 @@ class PostsTableViewController: UITableViewController {
         
         let post = posts[indexPath.row]
         
-        cell.textLabel?.text = post.title
-        cell.detailTextLabel?.text = "posted by: \(post.createdBy?.firstName ?? "") \(post.createdBy?.lastName ?? "") on \(Utilities.getFormattedDateString(post.createdAt!))"
+        cell.textLabel?.font = UIFont.boldSystemFont(ofSize: 18.0)
+        cell.textLabel?.text = "\(post.title) by \(post.createdByFullName)"
+        
+        cell.detailTextLabel?.font = UIFont.italicSystemFont(ofSize: 13.0)
+        cell.detailTextLabel?.text = "last updated on \(Utilities.getFormattedDateString(post.lastUpdated!))"
 
         return cell
     }

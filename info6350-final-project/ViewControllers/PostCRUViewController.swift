@@ -6,16 +6,19 @@
 //
 
 import UIKit
-import CoreData
+import FirebaseAuth
+import FirebaseFirestore
 
-class PostCRUViewController: UIViewController {
+class PostCRUViewController: UIViewController, UITextFieldDelegate {
     
-    var post:Post!
+    var post:Post?
     
-    let ds = DataStore.shared
-    let managedContext: NSManagedObjectContext = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext!
+    let db = Firestore.firestore()
+    
+    let user = Auth.auth().currentUser
 
     @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var lastUpdatedAtLabel: UILabel!
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var titleInput: UITextField!
     @IBOutlet weak var descriptionInput: UITextView!
@@ -34,12 +37,14 @@ class PostCRUViewController: UIViewController {
             
             titleLabel.text = "Update Post"
             titleInput.text = post?.title
+            lastUpdatedAtLabel.text = "last updated at \(Utilities.getFormattedDateString(post!.lastUpdated!))"
             descriptionInput.text = post?.body
         } else {
             actionButton.setTitle("Post", for: .normal)
             
             titleLabel.text = "Create New Post"
             descriptionInput.text = ""
+            lastUpdatedAtLabel.isHidden = true
         }
         
         clearError()
@@ -53,6 +58,18 @@ class PostCRUViewController: UIViewController {
     func showError(_ message:String) {
         errorLabel.text = message
         errorLabel.alpha = 1
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let nextTag = textField.tag + 1
+
+        if let nextResponder = textField.superview?.viewWithTag(nextTag) {
+            nextResponder.becomeFirstResponder()
+        } else {
+            textField.resignFirstResponder()
+        }
+
+        return true
     }
     
     func validateFields() -> String? {
@@ -72,22 +89,55 @@ class PostCRUViewController: UIViewController {
             let title = Utilities.sanitizeTextInput(titleInput.text!)
             let body = Utilities.sanitizeTextInput(descriptionInput.text!)
             
+            var alertMessage:String = ""
+            
             if post != nil {
-                post?.title = title
-                post?.body = body
+                db.collection("posts").document((post?.id)!).updateData([
+                    "title": title,
+                    "body": body,
+                    "lastUpdated": FieldValue.serverTimestamp()
+                ]) { err in
+                    if let err = err {
+                        self.showError("error saving data")
+                    }
+                }
                 
-                ds.saveContext()
+                alertMessage = "post updated successfully"
             } else {
-                let newPost = Post(context: managedContext)
+                db.collection("users").whereField("uid", isEqualTo: user?.uid).getDocuments() {(querySnapshot, err) in
+                    if let error = err {
+                        print(error)
+                        return
+                    }
+                    
+                    guard let documents = querySnapshot?.documents else {
+                        self.showError("error saving data")
+                        return
+                    }
+                    
+                    let dbUser = documents.compactMap { queryDocumentSnapshot -> User? in
+                        return try? queryDocumentSnapshot.data(as: User.self)
+                    }[0]
+                    
+                    let newPost = Post(title: title, body: body, createdByUID: (self.user?.uid)!, createdByFullName: "\(dbUser.firstName) \(dbUser.lastName)")
+                    
+                    do {
+                        let _ = try self.db.collection("posts").addDocument(from: newPost)
+                    } catch {
+                        self.showError("error creating post")
+                    }
+                }
                 
-                newPost.title = title
-                newPost.body = body
-                newPost.createdBy = ds.authUser
-                
-                ds.addPost(newPost)
+                alertMessage = "post created successfully"
             }
             
-            self.navigationController?.popViewController(animated: true)
+            let alert = UIAlertController(title: "Message", message: alertMessage, preferredStyle: .alert)
+            
+            alert.addAction(UIAlertAction(title: "Ok", style: .cancel) { _ in
+                self.navigationController?.popViewController(animated: true)
+            })
+            
+            present(alert, animated: true, completion: nil)
         }
     }
     

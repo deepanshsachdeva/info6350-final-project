@@ -28,7 +28,7 @@ class Utilities {
     
     static func getFormattedDateString(_ date: Date) -> String {
         let dateFormatterPrint = DateFormatter()
-        dateFormatterPrint.dateFormat = "MMM dd,yyyy h:mm a"
+        dateFormatterPrint.dateFormat = "MMM dd, yyyy h:mm a"
         
         return dateFormatterPrint.string(from: date)
     }

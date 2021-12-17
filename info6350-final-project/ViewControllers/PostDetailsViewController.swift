@@ -25,9 +25,9 @@ class PostDetailsViewController: UIViewController {
         descriptionTextView.layer.borderColor = UIColor.darkGray.cgColor
         
         titleLabel.text = post?.title
-        createdByLabel.text = "by \((post?.createdBy?.firstName)!) \((post?.createdBy?.lastName)!)"
-        createdOnLabel.text = Utilities.getFormattedDateString((post?.createdAt)!)
-        descriptionTextView.text = post?.body!
+        createdByLabel.text = "posted by \(post!.createdByFullName)"
+        createdOnLabel.text = "last updated at \(Utilities.getFormattedDateString(post!.lastUpdated!))"
+        descriptionTextView.text = post?.body
     }
     
 

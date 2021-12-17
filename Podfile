@@ -6,7 +6,9 @@ target 'info6350-final-project' do
   use_frameworks!
 
   # Pods for info6350-final-project
-  pod 'Firebase/Analytics'
   pod 'Firebase/Auth'
+  pod 'Firebase/Core'
+  pod 'Firebase/Firestore'
+  pod 'FirebaseFirestoreSwift', '~> 7.0-beta'
 
 end

@@ -6,14 +6,12 @@
 //
 
 import UIKit
-import CoreData
 import FirebaseAuth
+import FirebaseFirestore
 
 class RegisterViewController: UIViewController, UITextFieldDelegate {
     
-    var ds = DataStore.shared
-    
-    var managedContext: NSManagedObjectContext = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext!
+    let db = Firestore.firestore()
 
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var firstNameInput: UITextField!
@@ -89,7 +87,7 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         }
         
         if Utilities.isPasswordValid(cleanedPassword) == false {
-            return "Please make sure your password is at least 8 characters, contains a special character and a number."
+            return "Password must be min 8 characters, contains a special character and a number."
         }
         
         return nil
@@ -108,19 +106,18 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
             
             Auth.auth().createUser(withEmail: email, password: password, completion: { (result,err) in
                 if err != nil {
-                    
                     switch AuthErrorCode(rawValue: err!._code) {
                         case .emailAlreadyInUse : self.showError("Email already registered")
-                        default: self.showError("Error creating user")
+                        default: self.showError("error creating user")
                     }
                 } else {
-                    let user = User(context: self.managedContext)
-                    user.id = result!.user.uid
-                    user.firstName = firstName
-                    user.lastName = lastName
-                    self.ds.addUser(user)
+                    let newUser = User(uid: (result?.user.uid)!, firstName: firstName, lastName: lastName, email: email)
                     
-                    self.ds.authUser = user
+                    do {
+                        let _ = try self.db.collection("users").addDocument(from: newUser)
+                    } catch {
+                        self.showError("error storing user")
+                    }
                     
                     self.resetFields()
                     self.performSegue(withIdentifier: "afterRegisterSuccess", sender: nil)
