@@ -215,6 +215,49 @@
             </objects>
             <point key="canvasLocation" x="4397.663551401869" y="961.55507559395255"/>
         </scene>
+        <!--About-->
+        <scene sceneID="8it-7y-BTQ">
+            <objects>
+                <viewController id="wdT-Ry-ZmN" customClass="AboutViewController" customModule="info6350_final_project" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="nHJ-kD-pt3">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="About" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uqe-Bs-36u">
+                                <rect key="frame" x="40" y="40" width="334" height="48"/>
+                                <fontDescription key="fontDescription" type="system" weight="thin" pointSize="40"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="justified" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fdo-zF-Ghw">
+                                <rect key="frame" x="40" y="108" width="334" height="539"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="17"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="bTV-lc-VtT"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="bTV-lc-VtT" firstAttribute="trailing" secondItem="Uqe-Bs-36u" secondAttribute="trailing" constant="40" id="EyA-v4-KNj"/>
+                            <constraint firstItem="bTV-lc-VtT" firstAttribute="bottom" secondItem="fdo-zF-Ghw" secondAttribute="bottom" constant="40" id="MJ0-5o-V5n"/>
+                            <constraint firstItem="Uqe-Bs-36u" firstAttribute="top" secondItem="bTV-lc-VtT" secondAttribute="top" constant="40" id="RnK-Ap-kam"/>
+                            <constraint firstItem="Uqe-Bs-36u" firstAttribute="leading" secondItem="bTV-lc-VtT" secondAttribute="leading" constant="40" id="VZK-hA-1af"/>
+                            <constraint firstItem="fdo-zF-Ghw" firstAttribute="top" secondItem="Uqe-Bs-36u" secondAttribute="bottom" constant="20" id="kzt-aI-JwS"/>
+                            <constraint firstItem="bTV-lc-VtT" firstAttribute="trailing" secondItem="fdo-zF-Ghw" secondAttribute="trailing" constant="40" id="t4p-aO-MhO"/>
+                            <constraint firstItem="fdo-zF-Ghw" firstAttribute="leading" secondItem="bTV-lc-VtT" secondAttribute="leading" constant="40" id="xD4-Ml-l92"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="About" image="info.circle" catalog="system" id="e6V-Gh-NF0"/>
+                    <connections>
+                        <outlet property="about" destination="fdo-zF-Ghw" id="w7A-SC-mAS"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="kh7-GB-71Y" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1038" y="-727"/>
+        </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="SHU-3d-tyY">
             <objects>
@@ -228,6 +271,7 @@
                     <connections>
                         <segue destination="euj-ev-mP5" kind="relationship" relationship="viewControllers" id="jTJ-rN-0Yp"/>
                         <segue destination="nSh-Ci-eE0" kind="relationship" relationship="viewControllers" id="lWC-8s-V09"/>
+                        <segue destination="wdT-Ry-ZmN" kind="relationship" relationship="viewControllers" id="132-4G-ktl"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GbM-Nd-VCU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -494,6 +538,7 @@
         <segue reference="gww-MN-Fe8"/>
     </inferredMetricsTieBreakers>
     <resources>
+        <image name="info.circle" catalog="system" width="128" height="121"/>
         <image name="list.dash" catalog="system" width="128" height="85"/>
         <image name="person" catalog="system" width="128" height="117"/>
         <image name="plus" catalog="system" width="128" height="113"/>

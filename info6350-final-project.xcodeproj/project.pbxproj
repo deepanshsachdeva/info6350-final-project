@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		913CFFE51BAA0861820E8107 /* Pods_info6350_final_project.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 428F284499BDE467ED2CF83F /* Pods_info6350_final_project.framework */; };
 		B2156ED2276BDB0300B530E3 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2156ED1276BDB0300B530E3 /* Post.swift */; };
+		B2299E49276D51FB007404C0 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2299E48276D51FB007404C0 /* AboutViewController.swift */; };
 		B23E2AF727663A6900096972 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B23E2AF627663A6900096972 /* GoogleService-Info.plist */; };
 		B23E2AFC27664B1D00096972 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = B23E2AFB27664B1D00096972 /* Podfile */; };
 		B23E2AFF2766B53D00096972 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23E2AFE2766B53D00096972 /* LoginViewController.swift */; };
@@ -34,6 +35,7 @@
 		44AD9FA5113A022C967DE33E /* Pods-info6350-final-project.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-info6350-final-project.release.xcconfig"; path = "Target Support Files/Pods-info6350-final-project/Pods-info6350-final-project.release.xcconfig"; sourceTree = "<group>"; };
 		5A6DC419E6A9FFE1E266083F /* Pods-info6350-final-project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-info6350-final-project.debug.xcconfig"; path = "Target Support Files/Pods-info6350-final-project/Pods-info6350-final-project.debug.xcconfig"; sourceTree = "<group>"; };
 		B2156ED1276BDB0300B530E3 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
+		B2299E48276D51FB007404C0 /* AboutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		B23E2AF627663A6900096972 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B23E2AFB27664B1D00096972 /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B23E2AFE2766B53D00096972 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 				B23E2B142768A9E200096972 /* UserPostsTableViewController.swift */,
 				B23E2B1827698C1C00096972 /* PostCRUViewController.swift */,
 				B243FEA0276AB85100811551 /* PostDetailsViewController.swift */,
+				B2299E48276D51FB007404C0 /* AboutViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 				B23E2B112768672300096972 /* PostsTableViewController.swift in Sources */,
 				B2EAC773276639300012B619 /* ViewController.swift in Sources */,
 				B2EAC76F276639300012B619 /* AppDelegate.swift in Sources */,
+				B2299E49276D51FB007404C0 /* AboutViewController.swift in Sources */,
 				B2A6F3EB276BE79D00B5C0B3 /* User.swift in Sources */,
 				B23E2B012766B55600096972 /* RegisterViewController.swift in Sources */,
 				B23E2B1927698C1C00096972 /* PostCRUViewController.swift in Sources */,
